@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Erdbeeren</string>
+    <string name="sign_in">Iniciar Sesión</string>
+    <string name="password">Contraseña</string>
+    <string name="username">Nombre de usuario</string>
+    <string name="main_icon_content_description">Logo de la aplicación | Erdbeeren | Fresa</string>
+</resources>

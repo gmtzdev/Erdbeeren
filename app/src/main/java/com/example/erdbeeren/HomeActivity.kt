@@ -23,6 +23,7 @@ import com.example.erdbeeren.data.PendingAccount
 import com.example.erdbeeren.data.SaleEntity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.chip.ChipGroup
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
@@ -253,15 +254,25 @@ class HomeActivity : AppCompatActivity() {
         fragmentContainer.removeAllViews()
         val view = LayoutInflater.from(this).inflate(R.layout.layout_clients, fragmentContainer, false)
 
-        val btnCreateClient = view.findViewById<Button>(R.id.btnCreateClient)
-        val btnViewClients = view.findViewById<Button>(R.id.btnViewClients)
+        val rvClients = view.findViewById<RecyclerView>(R.id.rvClients)
+        val fabAddClient = view.findViewById<FloatingActionButton>(R.id.fabAddClient)
 
-        btnCreateClient.setOnClickListener {
-            startActivity(Intent(this, CreateClientActivity::class.java))
+        rvClients.layoutManager = LinearLayoutManager(this)
+        val clientAdapter = ClientAdapter(emptyList())
+        rvClients.adapter = clientAdapter
+
+        // Cargar clientes desde Room DB
+        lifecycleScope.launch(Dispatchers.IO) {
+            val db = AppDatabase.getInstance(applicationContext)
+            val clientList = db.clientDao().getAllClients()
+
+            withContext(Dispatchers.Main) {
+                clientAdapter.updateClients(clientList)
+            }
         }
 
-        btnViewClients.setOnClickListener {
-            startActivity(Intent(this, ShowUsers_Activity::class.java))
+        fabAddClient.setOnClickListener {
+            startActivity(Intent(this, CreateClientActivity::class.java))
         }
 
         fragmentContainer.addView(view)

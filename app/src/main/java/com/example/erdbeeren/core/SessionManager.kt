@@ -19,7 +19,6 @@ class SessionManager(private val context: Context) {
         val USER_ID = stringPreferencesKey("user_id")
         val USER_NAME = stringPreferencesKey("user_name")
         val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
-
         val DARK_MODE = booleanPreferencesKey("dark_mode")
     }
 

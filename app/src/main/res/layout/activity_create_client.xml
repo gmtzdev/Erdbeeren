@@ -26,30 +26,41 @@
         android:textSize="14sp"
         />
 
-    <EditText
-        android:id="@+id/edClientname"
+
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="text"
-        android:background="@drawable/general_input"
-        android:textColor="#fff"
-        android:hint="Nombre"
-        android:textColorHint="#58FFFFFF"
         android:layout_marginBottom="14dp"
         android:textSize="14sp"
-        />
+        android:hint="Nombre del cliente"
+        android:textColorHint="#58FFFFFF">
 
-    <EditText
-        android:id="@+id/edPhone"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edClientname"
+            android:textSize="14sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:background="@drawable/general_input"
+            android:textColor="#fff"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="text"
-        android:hint="Número de teléfono"
-        android:textColorHint="#58FFFFFF"
-        android:background="@drawable/general_input"
-        android:textColor="#fff"
         android:textSize="14sp"
-        />
+        android:hint="Número de teléfono"
+        android:textColorHint="#58FFFFFF">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/edPhone"
+            android:textSize="14sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="phone"
+            android:background="@drawable/general_input"
+            android:textColor="#fff"/>
+    </com.google.android.material.textfield.TextInputLayout>
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -61,8 +61,8 @@
             android:id="@+id/btnSaveClient"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="#A20101"
-            android:textColor="#fff"
+            android:backgroundTint="@color/disablered"
+            android:textColor="@color/disabledtext"
             android:enabled="false"
             android:text="Guardar"/>
 

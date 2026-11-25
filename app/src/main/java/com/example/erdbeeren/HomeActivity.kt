@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.erdbeeren.core.SessionManager
@@ -23,6 +24,7 @@ import com.example.erdbeeren.data.PendingAccount
 import com.example.erdbeeren.data.SaleEntity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.chip.ChipGroup
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -36,6 +38,7 @@ class HomeActivity : AppCompatActivity() {
 
     private lateinit var fragmentContainer: FrameLayout
     private lateinit var bottomNavigation: BottomNavigationView
+    private var clientAdapter: ClientAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,6 +78,25 @@ class HomeActivity : AppCompatActivity() {
 
         // Cargar vista inicial (Inicio)
         showHomeSection()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Si estamos en la pestaña de clientes, recargar la lista automáticamente al regresar de crear un cliente
+        if (::bottomNavigation.isInitialized && bottomNavigation.selectedItemId == R.id.nav_clients) {
+            loadClientsList()
+        }
+    }
+
+    private fun loadClientsList() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val db = AppDatabase.getInstance(applicationContext)
+            val clientList = db.clientDao().getAllClients()
+
+            withContext(Dispatchers.Main) {
+                clientAdapter?.updateClients(clientList)
+            }
+        }
     }
 
     private fun showHomeSection() {
@@ -258,24 +280,90 @@ class HomeActivity : AppCompatActivity() {
         val fabAddClient = view.findViewById<FloatingActionButton>(R.id.fabAddClient)
 
         rvClients.layoutManager = LinearLayoutManager(this)
-        val clientAdapter = ClientAdapter(emptyList())
+        clientAdapter = ClientAdapter(
+            clients = emptyList(),
+            onClientClick = { client ->
+                val intent = Intent(this, ClientSalesActivity::class.java).apply {
+                    putExtra("CLIENT_ID", client.id)
+                    putExtra("CLIENT_NAME", client.clientName)
+                }
+                startActivity(intent)
+            },
+            onClientLongClick = { client ->
+                showEditClientDialog(client)
+            }
+        )
         rvClients.adapter = clientAdapter
 
-        // Cargar clientes desde Room DB
-        lifecycleScope.launch(Dispatchers.IO) {
-            val db = AppDatabase.getInstance(applicationContext)
-            val clientList = db.clientDao().getAllClients()
+        // Configurar gesto de arrastrar (swipe) hacia la derecha para eliminar cliente
+        val swipeHandler = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean = false
 
-            withContext(Dispatchers.Main) {
-                clientAdapter.updateClients(clientList)
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.bindingAdapterPosition
+                val client = clientAdapter?.getClientAt(position)
+                if (client != null) {
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        val db = AppDatabase.getInstance(applicationContext)
+                        db.clientDao().deleteClient(client)
+
+                        val updatedList = db.clientDao().getAllClients()
+                        withContext(Dispatchers.Main) {
+                            clientAdapter?.updateClients(updatedList)
+                            Snackbar.make(fragmentContainer, "Cliente eliminado: ${client.clientName}", Snackbar.LENGTH_SHORT).show()
+                        }
+                    }
+                }
             }
         }
+        ItemTouchHelper(swipeHandler).attachToRecyclerView(rvClients)
+
+        loadClientsList()
 
         fabAddClient.setOnClickListener {
             startActivity(Intent(this, CreateClientActivity::class.java))
         }
 
         fragmentContainer.addView(view)
+    }
+
+    private fun showEditClientDialog(client: ClientEntity) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_edit_client, null)
+        val etName = dialogView.findViewById<TextInputEditText>(R.id.etEditClientName)
+        val etPhone = dialogView.findViewById<TextInputEditText>(R.id.etEditClientPhone)
+
+        etName.setText(client.clientName)
+        etPhone.setText(client.phoneNumber)
+
+        MaterialAlertDialogBuilder(this)
+            .setView(dialogView)
+            .setPositiveButton("Actualizar") { dialog, _ ->
+                val newName = etName.text.toString().trim()
+                val newPhone = etPhone.text.toString().trim()
+
+                if (newName.isNotEmpty()) {
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        val db = AppDatabase.getInstance(applicationContext)
+                        val updatedClient = client.copy(clientName = newName, phoneNumber = newPhone)
+                        db.clientDao().updateClient(updatedClient)
+
+                        val updatedList = db.clientDao().getAllClients()
+                        withContext(Dispatchers.Main) {
+                            clientAdapter?.updateClients(updatedList)
+                            Snackbar.make(fragmentContainer, "Cliente actualizado con éxito", Snackbar.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancelar") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 
     private fun showSettingsSection() {

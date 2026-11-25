@@ -5,10 +5,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.erdbeeren.data.PaymentEntity
+import com.example.erdbeeren.data.PaymentWithUser
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
-class PaymentAdapter(private var payments: List<PaymentEntity> ) :
+class PaymentAdapter(private var payments: List<PaymentWithUser>) :
     RecyclerView.Adapter<PaymentAdapter.PaymentViewHolder>(){
+
+    private val dateFormatter = DateTimeFormatter.ofPattern("EEEE, dd/MM/yyyy", Locale.forLanguageTag("es"))
+        .withZone(ZoneId.systemDefault())
 
     class PaymentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvAmount =  itemView.findViewById<TextView>(R.id.tvAmount)
@@ -22,15 +28,19 @@ class PaymentAdapter(private var payments: List<PaymentEntity> ) :
     }
 
     override fun onBindViewHolder(holder: PaymentViewHolder, position: Int){
-        val payment = payments[position]
-        holder.tvAmount.text = "Monto: $${payment.amount}"
-        holder.tvUserToPay.text = "Recibe: ${payment.userToPay}"
-        holder.tvPaymentDate.text = "Fecha: ${payment.date}"
+        val paymentWithUser = payments[position]
+        holder.tvAmount.text = "Monto: $${paymentWithUser.payment.amount}"
+        holder.tvUserToPay.text = "Recibe: ${paymentWithUser.user.username}"
+
+        val formattedDate = dateFormatter.format(paymentWithUser.payment.date)
+        val capitalizedDate = formattedDate.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.forLanguageTag("es")) else it.toString() }
+
+        holder.tvPaymentDate.text = "Fecha: $capitalizedDate"
     }
 
     override fun getItemCount(): Int = payments.size
 
-    fun updatePayments(newPayments: List<PaymentEntity>){
+    fun updatePayments(newPayments: List<PaymentWithUser>){
         payments = newPayments
         notifyDataSetChanged()
     }

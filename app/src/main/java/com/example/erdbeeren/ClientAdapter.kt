@@ -7,8 +7,11 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.erdbeeren.data.ClientEntity
 
-class ClientAdapter(private var clients: List<ClientEntity>) :
-    RecyclerView.Adapter<ClientAdapter.ClientViewHolder>() {
+class ClientAdapter(
+    private var clients: List<ClientEntity>,
+    private val onClientClick: (ClientEntity) -> Unit,
+    private val onClientLongClick: (ClientEntity) -> Unit
+) : RecyclerView.Adapter<ClientAdapter.ClientViewHolder>() {
 
     class ClientViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvClientName: TextView = itemView.findViewById(R.id.tvCardClientName)
@@ -29,9 +32,20 @@ class ClientAdapter(private var clients: List<ClientEntity>) :
         } else {
             "Sin teléfono registrado"
         }
+
+        holder.itemView.setOnClickListener {
+            onClientClick(client)
+        }
+
+        holder.itemView.setOnLongClickListener {
+            onClientLongClick(client)
+            true
+        }
     }
 
     override fun getItemCount(): Int = clients.size
+
+    fun getClientAt(position: Int): ClientEntity = clients[position]
 
     fun updateClients(newClients: List<ClientEntity>) {
         clients = newClients

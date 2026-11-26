@@ -39,6 +39,7 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var fragmentContainer: FrameLayout
     private lateinit var bottomNavigation: BottomNavigationView
     private var clientAdapter: ClientAdapter? = null
+    private var pedingAccountAdapter: PendingAccountAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,6 +87,10 @@ class HomeActivity : AppCompatActivity() {
         if (::bottomNavigation.isInitialized && bottomNavigation.selectedItemId == R.id.nav_clients) {
             loadClientsList()
         }
+        else if(::bottomNavigation.isInitialized && bottomNavigation.selectedItemId == R.id.nav_home) {
+            loadHomeList()
+        }
+
     }
 
     private fun loadClientsList() {
@@ -99,6 +104,16 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
+    private fun loadHomeList(){
+        lifecycleScope.launch(Dispatchers.IO) {
+            val db = AppDatabase.getInstance(applicationContext)
+            val salesWithClient = db.saleDao().getSalesWithClient()
+
+            withContext(Dispatchers.Main) {
+                pedingAccountAdapter?.updateAccounts(salesWithClient)
+            }
+        }
+    }
     private fun showHomeSection() {
         fragmentContainer.removeAllViews()
         val view = LayoutInflater.from(this).inflate(R.layout.layout_home_content, fragmentContainer, false)
@@ -106,18 +121,15 @@ class HomeActivity : AppCompatActivity() {
         val rvPendingAccounts = view.findViewById<RecyclerView>(R.id.rvPendingAccounts)
         rvPendingAccounts.layoutManager = LinearLayoutManager(this)
 
+
+        pedingAccountAdapter = PendingAccountAdapter(
+            accounts = emptyList()
+        )
+        rvPendingAccounts.adapter = pedingAccountAdapter
+
         // Consultamos las ventas
-        lifecycleScope.launch(Dispatchers.IO) {
-            val db = AppDatabase.getInstance(applicationContext)
-            val salesWithClient = db.saleDao().getSalesWithClient()
-
-            withContext(Dispatchers.Main) {
-                val sampleData = salesWithClient
-
-                rvPendingAccounts.adapter = PendingAccountAdapter(sampleData)
-                fragmentContainer.addView(view)
-            }
-        }
+        loadHomeList()
+        fragmentContainer.addView(view)
     }
 
     private fun showSalesSection() {
@@ -280,6 +292,7 @@ class HomeActivity : AppCompatActivity() {
         val fabAddClient = view.findViewById<FloatingActionButton>(R.id.fabAddClient)
 
         rvClients.layoutManager = LinearLayoutManager(this)
+
         clientAdapter = ClientAdapter(
             clients = emptyList(),
             onClientClick = { client ->
@@ -293,6 +306,7 @@ class HomeActivity : AppCompatActivity() {
                 showEditClientDialog(client)
             }
         )
+
         rvClients.adapter = clientAdapter
 
         // Configurar gesto de arrastrar (swipe) hacia la derecha para eliminar cliente

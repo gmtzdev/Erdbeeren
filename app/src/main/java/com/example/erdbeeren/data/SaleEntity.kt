@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import java.time.Instant
 
 @Entity(
     tableName = "sales",
@@ -30,4 +31,5 @@ data class SaleEntity(
     val cArG: Int = 0,
     val cMar: Int = 0,
     val cCaj: Int = 0,
+    val date: Instant = Instant.now()
 )

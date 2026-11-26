@@ -5,16 +5,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.erdbeeren.core.DateFormatter
 import com.example.erdbeeren.data.PaymentWithUser
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 class PaymentAdapter(private var payments: List<PaymentWithUser>) :
     RecyclerView.Adapter<PaymentAdapter.PaymentViewHolder>(){
-
-    private val dateFormatter = DateTimeFormatter.ofPattern("EEEE, dd/MM/yyyy", Locale.forLanguageTag("es"))
-        .withZone(ZoneId.systemDefault())
 
     class PaymentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvAmount =  itemView.findViewById<TextView>(R.id.tvAmount)
@@ -32,10 +27,8 @@ class PaymentAdapter(private var payments: List<PaymentWithUser>) :
         holder.tvAmount.text = "Monto: $${paymentWithUser.payment.amount}"
         holder.tvUserToPay.text = "Recibe: ${paymentWithUser.user.username}"
 
-        val formattedDate = dateFormatter.format(paymentWithUser.payment.date)
-        val capitalizedDate = formattedDate.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.forLanguageTag("es")) else it.toString() }
-
-        holder.tvPaymentDate.text = "Fecha: $capitalizedDate"
+        val formattedDate = DateFormatter.format(paymentWithUser.payment.date)
+        holder.tvPaymentDate.text = "Fecha: $formattedDate"
     }
 
     override fun getItemCount(): Int = payments.size

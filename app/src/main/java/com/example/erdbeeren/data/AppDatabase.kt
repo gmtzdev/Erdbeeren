@@ -9,7 +9,7 @@ import com.example.erdbeeren.core.Converters
 
 @Database(
     entities = [UserEntity::class, ClientEntity::class, SaleEntity::class, PaymentEntity::class],
-    version = 6,
+    version = 7,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

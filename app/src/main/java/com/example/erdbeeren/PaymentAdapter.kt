@@ -5,9 +5,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.erdbeeren.data.PaymentEntity
+import com.example.erdbeeren.core.DateFormatter
+import com.example.erdbeeren.data.PaymentWithUser
 
-class PaymentAdapter(private var payments: List<PaymentEntity> ) :
+class PaymentAdapter(private var payments: List<PaymentWithUser>) :
     RecyclerView.Adapter<PaymentAdapter.PaymentViewHolder>(){
 
     class PaymentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -22,15 +23,17 @@ class PaymentAdapter(private var payments: List<PaymentEntity> ) :
     }
 
     override fun onBindViewHolder(holder: PaymentViewHolder, position: Int){
-        val payment = payments[position]
-        holder.tvAmount.text = "Monto: $${payment.amount}"
-        holder.tvUserToPay.text = "Recibe: ${payment.userToPay}"
-        holder.tvPaymentDate.text = "Fecha: ${payment.date}"
+        val paymentWithUser = payments[position]
+        holder.tvAmount.text = "Monto: $${paymentWithUser.payment.amount}"
+        holder.tvUserToPay.text = "Recibe: ${paymentWithUser.user.username}"
+
+        val formattedDate = DateFormatter.format(paymentWithUser.payment.date)
+        holder.tvPaymentDate.text = "Fecha: $formattedDate"
     }
 
     override fun getItemCount(): Int = payments.size
 
-    fun updatePayments(newPayments: List<PaymentEntity>){
+    fun updatePayments(newPayments: List<PaymentWithUser>){
         payments = newPayments
         notifyDataSetChanged()
     }

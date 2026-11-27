@@ -9,11 +9,14 @@ import android.widget.TextView
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.example.erdbeeren.core.DateFormatter
 import com.example.erdbeeren.data.SalesWithClient
 import com.google.android.material.card.MaterialCardView
 import java.util.Locale
 
-class PendingAccountAdapter(private var accounts: List<SalesWithClient>) :
+class PendingAccountAdapter(
+    private var accounts: List<SalesWithClient>
+) :
     RecyclerView.Adapter<PendingAccountAdapter.PendingAccountViewHolder>() {
 
     class PendingAccountViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -21,6 +24,7 @@ class PendingAccountAdapter(private var accounts: List<SalesWithClient>) :
         val tvClientName: TextView = itemView.findViewById(R.id.tvClientName)
         val tvTotalAmount: TextView = itemView.findViewById(R.id.tvTotalAmount)
         val tvPendingAmount: TextView = itemView.findViewById(R.id.tvPendingAmount)
+        val tvDate: TextView = itemView.findViewById(R.id.tvDate)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PendingAccountViewHolder {
@@ -33,10 +37,12 @@ class PendingAccountAdapter(private var accounts: List<SalesWithClient>) :
         val account = accounts[position]
         val transitionName = "card_transition_${account.sale.id}"
         ViewCompat.setTransitionName(holder.cardView, transitionName)
+        val formattedDate = DateFormatter.format(account.sale.date)
 
         holder.tvClientName.text = account.client.clientName
         holder.tvTotalAmount.text = String.format(Locale.getDefault(), "%.1f kg", account.sale.kg)
-        holder.tvPendingAmount.text = String.format(Locale.getDefault(), "$%.2f", account.sale.total)
+        holder.tvPendingAmount.text = String.format(Locale.getDefault(), "$%.2f", account.sale.pending)
+        holder.tvDate.text = formattedDate
 
         holder.cardView.setOnClickListener {
             val context = holder.itemView.context

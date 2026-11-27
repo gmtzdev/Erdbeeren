@@ -19,6 +19,7 @@ class SessionManager(private val context: Context) {
         val USER_ID = stringPreferencesKey("user_id")
         val USER_NAME = stringPreferencesKey("user_name")
         val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
+        val DARK_MODE = booleanPreferencesKey("dark_mode")
     }
 
 
@@ -26,6 +27,7 @@ class SessionManager(private val context: Context) {
     val isLoggedIn: Flow<Boolean> = context.dataStore.data.map { preferences -> preferences[IS_LOGGED_IN] ?: false}
     val userId: Flow<String?> = context.dataStore.data.map { preferences -> preferences[USER_ID] }
     val userName: Flow<String?> = context.dataStore.data.map { preferences -> preferences[USER_NAME] }
+    val darkMode: Flow<Boolean> = context.dataStore.data.map { preferences -> preferences[DARK_MODE] ?: false }
 
 
 
@@ -42,6 +44,12 @@ class SessionManager(private val context: Context) {
     suspend fun logout() {
         context.dataStore.edit { preferences ->
             preferences.clear()
+        }
+    }
+
+    suspend fun toggleDarkMode(){
+        context.dataStore.edit { preferences ->
+            preferences[DARK_MODE] = !preferences[DARK_MODE]!!
         }
     }
 }

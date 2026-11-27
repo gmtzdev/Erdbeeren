@@ -166,7 +166,7 @@ class SaleDetailActivity : AppCompatActivity() {
     private fun loadPayments(saleId: Int) {
         lifecycleScope.launch(Dispatchers.IO) {
             val db = AppDatabase.getInstance(applicationContext)
-            val payments = db.paymentDao().getPaymentsBySale(saleId)
+            val payments = db.paymentDao().getPaymentsWithUserBySale(saleId)
             withContext(Dispatchers.Main) {
                 adapter.updatePayments(payments)
             }

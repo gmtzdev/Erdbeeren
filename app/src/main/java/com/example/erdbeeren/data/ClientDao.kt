@@ -1,9 +1,11 @@
 package com.example.erdbeeren.data
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 
 @Dao
 interface ClientDao {
@@ -25,4 +27,10 @@ interface ClientDao {
 
     @Insert
     fun insertClient(client: ClientEntity)
+
+    @Update
+    fun updateClient(client: ClientEntity)
+
+    @Delete
+    fun deleteClient(client: ClientEntity)
 }
